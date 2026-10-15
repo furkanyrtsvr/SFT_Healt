@@ -1,6 +1,6 @@
 # SFT Health — Mikroişlemci kaynakları V17
 
-`SFT_Son_Surum_C_Dosyalari_V17.zip` içinden aktarılan 13 C dosyası. Zephyr cihaz modeli, devicetree, GPIO/I²C, settings depolaması ve Nordic UART Service kullanır.
+`SFT_V17_Elektronik_Cihaz_Tam_Kaynak.zip` içinden aktarılan tam V17 uygulama kaynakları. `src/` altında 13 C dosyası ve 13 başlık; kökte `app.overlay`, `prj.conf`, `CMakeLists.txt` bulunur. İlk C arşiviyle ortak 13 dosyanın içerikleri aynıdır. Zephyr cihaz modeli, devicetree, GPIO/I²C, settings depolaması ve Nordic UART Service kullanır.
 
 ![Breadboard üzerinde SFT Health prototipi](docs/images/donanim-prototipi.png)
 
@@ -10,33 +10,36 @@ Fotoğraf kullanıcı tarafından sağlanmıştır. Bileşen yerleşimini göste
 
 | Bileşen | Görevi | Kaynaktaki dayanak |
 | --- | --- | --- |
-| nRF52840 tabanlı geliştirme kartı | Ana kontrol ve BLE | Web `health-dashboard.tsx` içinde model ve `nRF52840_fy` cihaz adı; C tarafı Zephyr/NUS |
+| Pro Micro nRF52840 | Nordic nRF52840 ile ana kontrol ve BLE | Kullanıcı kart teyidi; `prj.conf`: `nRF52840_fy`; Zephyr/NUS |
 | MAX30102 | Optik örneklerden nabız/BPM | `max30102.c`, `heart_rate.c`; I²C adresi `0x57` |
 | Basınç modülü + HX711 arayüzü | Solunum basıncı ham verisi, MEP/MIP | `pressure_sensor.c`; 24 bit okuma, Kanal A ×64 |
 | DHT11 | Ortam sıcaklığı ve bağıl nem | `environment_sensor.c`, devicetree `dht0` |
 | DS1302 RTC | Tarih/saat ve ölçüm zamanları | `rtc_clock.c`, CE/CLK/I/O hatları |
-| 128×64 OLED | Menü, nabız dalgası, sonuç ve durum ekranları | `display_ui.c`, `zephyr,display` |
+| SSD1306 128×64 OLED | Menü, nabız dalgası, sonuç ve durum ekranları | `app.overlay`: `solomon,ssd1306`, adres `0x3C` |
 | Döner enkoder + anahtarı | Menü gezinmesi, kısa/uzun basış | `input_encoder.c`, 900 ms uzun basış |
 | Breadboard, USB, jumper, RTC pili | Prototip bağlantısı ve besleme | Sağlanan donanım fotoğrafı |
 
-Kartın tam model/revizyonu, basınç transdüserinin modeli ve OLED denetleyici modeli kesinleştirilemedi. OLED için SSD1306 gibi bir model adı bu arşivden doğrulanamaz.
+Kart hedefi `promicro_nrf52840/nrf52840/uf2`, bootloader UF2 ve SDK nRF Connect SDK v3.4.0’dır. Basınç transdüserinin tam üretici/modeli belirtilmedi; kaynakta HX711 arayüzü kullanılır.
 
 ## Pinler ve bağlantılar
 
-**Fiziksel GPIO numaraları teslim edilen dosyalarda bulunmuyor.** Kod, bunları dışarıda kalan devicetree `.overlay` dosyasından alıyor. Kullanılacak bağlantılar:
+Fiziksel bağlantılar kullanıcı tarafından doğrulandı; GPIO tanımları `app.overlay` içindedir. Ortak I²C SDA/SCL kart pinleri kullanıcı eşlemesinden gelir; overlay I²C pinctrl’ü yeniden tanımlamaz, seçilen board hedefini devralır.
 
-| İşlev | Devicetree kaynağı | Modül hattı |
+| Modül hattı | Kart pini | nRF52840 GPIO |
 | --- | --- | --- |
-| Nabız sensörü I²C | `DT_NODELABEL(i2c0)` | MAX30102 SDA / SCL; adres `0x57` |
-| OLED | `DT_CHOSEN(zephyr_display)` | Ekran veri yolu ve adresi overlay ile belirlenir |
-| DHT11 | `DT_ALIAS(dht0)` | DATA |
-| Basınç saati | `/zephyr,user` → `pressure-sck-gpios` | HX711 PD_SCK |
-| Basınç verisi | `/zephyr,user` → `pressure-out-gpios` | HX711 DOUT |
-| RTC saati | `/zephyr,user` → `rtc-clk-gpios` | DS1302 SCLK |
-| RTC verisi | `/zephyr,user` → `rtc-data-gpios` | DS1302 I/O |
-| RTC seçimi | `/zephyr,user` → `rtc-ce-gpios` | DS1302 CE/RST |
-| Enkoder A / B | `encoder-a-gpios`, `encoder-b-gpios` | A/CLK, B/DT |
-| Enkoder butonu | `encoder-sw-gpios` | SW |
+| OLED + MAX30102 SDA | D6 | P1.00 |
+| OLED + MAX30102 SCL | D7 | P0.11 |
+| Enkoder A | D8 | P1.04 |
+| Enkoder B | D9 | P1.06 |
+| Enkoder butonu / diğer uç GND | D10 | P0.09 |
+| HX711 PD_SCK | D2 | P0.17 |
+| HX711 DOUT | D3 | P0.20 |
+| DHT11 DATA | D4 | P0.22 |
+| DS1302 CLK | D5 | P0.24 |
+| DS1302 DATA | D15/A0 | P0.02 |
+| DS1302 CE/RST | D12 | P1.11 |
+
+Modüllerin GND uçları ortak, beslemeleri kullanıcının bildirdiği şekilde **3V3** olmalıdır. DHT11 DATA hattında 3V3’e **4,7–10 kΩ pull-up** kullanılır. OLED `0x3C`, MAX30102 `0x57` adresindedir; MAX30102 INT pini kullanılmaz.
 
 [Ayrıntılı donanım ve pin belgesi](docs/DONANIM_VE_PINLER.md). C makrolarında bu property adlarının tireleri alt çizgiye dönüşür; örneğin `pressure_sck_gpios`.
 
@@ -70,14 +73,16 @@ Kartın tam model/revizyonu, basınç transdüserinin modeli ve OLED denetleyici
 
 ## Derleme için gerekenler
 
-Arşiv tam Zephyr projesi değildir. Şunlar ayrıca gerekir:
+**nRF Connect SDK v3.4.0** ve ona ait toolchain/workspace etkin olmalıdır. `west` komutunu SDK terminalinde, bu `01-Mikroislemci/` klasöründe çalıştırın:
 
-- Kaynakların `#include` ettiği 13 proje `.h` dosyası.
-- `CMakeLists.txt` ve sürümü belirli `prj.conf`.
-- Kesin kart hedefi, `.overlay`, pinctrl/I²C ve ekran/sensör tanımları.
-- Uyumlu Zephyr / nRF Connect SDK sürümü, NUS ve settings/flash yapılandırması.
-- Bootloader, programlayıcı/yükleme yolu ve varsa flash bölüm tanımları.
+```sh
+west build -p always -b promicro_nrf52840/nrf52840/uf2 .
+```
 
-Bu bilgiler gelmeden rastgele `west build -b ...` hedefi veya pin yerleşimi önerilmiyor. C kaynakları içerik değişikliği yapılmadan korunmuştur; firmware derlemesi veya karta yazma yapılmadı.
+`CMakeLists.txt` 13 `src/*.c` dosyasını derlemeye ekler. `prj.conf` GPIO, I²C, SSD1306, DHT, flash/NVS/settings ve BLE NUS ayarlarını içerir. `app.overlay` sensörleri, ekranı ve GPIO’ları tanımlar. Board hedefinin SDK ortamında mevcut olması gerekir.
+
+UF2 yüklemesi için kartın UF2 bootloader akışını kullanın; SDK build çıktısında UF2 dosyası üretildiğinde bunu bootloader sürücüsüne aktarın. Bu aktarımda bootloader moduna geçiş veya karta program yazma işlemi yapılmadı. CMake proje adı arşivdeki `OLED_Merhaba` olarak korunmuştur. Tam kaynaklar eklendi; SDK derlemesinin bu makinede yapıldığı iddia edilmez.
+
+Dosyalar: [src/](src/README.md), [app.overlay](app.overlay), [prj.conf](prj.conf), [CMakeLists.txt](CMakeLists.txt).
 
 [BLE protokolü](docs/BLE_PROTOKOLU.md) · [Web tarafı](../02-Web-Sitesi/README.md) · [Ana tanıtım](../README.md)

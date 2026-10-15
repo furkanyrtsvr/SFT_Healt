@@ -26,7 +26,7 @@ flowchart LR
   W <-->|Oturumlu API| DB[Cloudflare D1 / Drizzle]
 ```
 
-`nRF52840` bilgisi web kaynaklarındaki cihaz modelinden gelir. Kartın tam ticari modeli, board hedefi ve fiziksel pin numaraları gönderilen C arşivinde yoktur. [Donanım ve pin tablosunda](01-Mikroislemci/docs/DONANIM_VE_PINLER.md) kesin bilgiler ve eksikler ayrı gösterilir.
+Kart **Pro Micro nRF52840**, işlemci **Nordic nRF52840**, SDK **nRF Connect SDK v3.4.0**, Zephyr hedefi **`promicro_nrf52840/nrf52840/uf2`** ve bootloader türü **UF2** olarak kullanıcı tarafından doğrulandı. Bluetooth adı `nRF52840_fy` olarak `prj.conf` içinde tanımlıdır. Tam proje dosyaları ve [kesin pin tablosu](01-Mikroislemci/docs/DONANIM_VE_PINLER.md) eklendi.
 
 ## Görseller
 
@@ -46,7 +46,7 @@ Web görüntüleri kaynak uygulamanın yerel önizlemesinden alınır; bağlı c
 
 ## Başlangıç
 
-Web için [yerel kurulum rehberini](02-Web-Sitesi/README.md#yerel-kurulum) izleyin. Donanım tarafında yalnızca 13 `.c` dosyası teslim edildi: başlık dosyaları, board/overlay ve Zephyr proje yapılandırması tamamlanmadan doğrudan firmware derlemesi yapılamaz. Eksikler [mikroişlemci README’sinde](01-Mikroislemci/README.md#derleme-için-gerekenler) listelenmiştir.
+Web için [yerel kurulum rehberini](02-Web-Sitesi/README.md#yerel-kurulum), cihaz için [SDK ve derleme adımlarını](01-Mikroislemci/README.md#derleme-için-gerekenler) izleyin. Tam firmware arşivindeki `src/*.c`, `src/*.h`, `app.overlay`, `prj.conf` ve `CMakeLists.txt` korunmuştur. Firmware SDK derlemesi ve fiziksel donanım denemesi bu aktarımın parçası değildir.
 
 [BLE protokolü](01-Mikroislemci/docs/BLE_PROTOKOLU.md) · [Kaynak aktarım kaydı](02-Web-Sitesi/docs/AKTARIM.md)
 

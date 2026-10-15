@@ -1,1 +1,4 @@
-01-Mikroislemci/*.c -text
+01-Mikroislemci/src/* -text
+01-Mikroislemci/app.overlay -text
+01-Mikroislemci/prj.conf -text
+01-Mikroislemci/CMakeLists.txt -text
