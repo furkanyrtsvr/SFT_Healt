@@ -1,0 +1,13 @@
+**/node_modules/
+**/dist/
+**/.wrangler/
+**/.next/
+**/.vinext/
+**/build/
+**/__pycache__/
+*.log
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+*.pem
